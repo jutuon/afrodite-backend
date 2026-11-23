@@ -9,49 +9,49 @@ on:
       - "v*.*.*"
 
 jobs:
-  release:
-    name: Release ${{ matrix.target }}
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      matrix:
-        include:
-          - target: x86_64-unknown-linux-gnu
-            runs-on: ubuntu-22.04
-          - target: aarch64-unknown-linux-gnu
-            runs-on: ubuntu-22.04-arm
-    steps:
-      - name: Install PostgreSQL library
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libpq-dev
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Set reproducible build timestamp
-        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
-      - name: Build binary
-        run: |
-          export RUSTFLAGS="--remap-path-prefix=$GITHUB_WORKSPACE=/build --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo"
-          cargo build --release
-      - name: Create release assets
-        run: |
-          BINARY=afrodite-backend
-          NAME="$BINARY-${{ github.ref_name }}-${{ matrix.target }}"
-          ASSET="$NAME.tar.gz"
-          mkdir target/assets
-          cd target/assets
-          mkdir "$NAME"
-          mv "../release/$BINARY" "$NAME"
-          tar --sort=name \
-              --mtime="@${SOURCE_DATE_EPOCH}" \
-              --owner=0 --group=0 --numeric-owner \
-              -cf - "$NAME" | gzip -9n > "$ASSET"
-      - name: Upload assets
-        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          fail_on_unmatched_files: true
-          files: |
-            target/assets/*.tar.gz
+  # release:
+  #   name: Release ${{ matrix.target }}
+  #   runs-on: ${{ matrix.runs-on }}
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - target: x86_64-unknown-linux-gnu
+  #           runs-on: ubuntu-22.04
+  #         - target: aarch64-unknown-linux-gnu
+  #           runs-on: ubuntu-22.04-arm
+  #   steps:
+  #     - name: Install PostgreSQL library
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y libpq-dev
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Set reproducible build timestamp
+  #       run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+  #     - name: Build binary
+  #       run: |
+  #         export RUSTFLAGS="--remap-path-prefix=$GITHUB_WORKSPACE=/build --remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo"
+  #         cargo build --release
+  #     - name: Create release assets
+  #       run: |
+  #         BINARY=afrodite-backend
+  #         NAME="$BINARY-${{ github.ref_name }}-${{ matrix.target }}"
+  #         ASSET="$NAME.tar.gz"
+  #         mkdir target/assets
+  #         cd target/assets
+  #         mkdir "$NAME"
+  #         mv "../release/$BINARY" "$NAME"
+  #         tar --sort=name \
+  #             --mtime="@${SOURCE_DATE_EPOCH}" \
+  #             --owner=0 --group=0 --numeric-owner \
+  #             -cf - "$NAME" | gzip -9n > "$ASSET"
+  #     - name: Upload assets
+  #       uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       with:
+  #         fail_on_unmatched_files: true
+  #         files: |
+  #           target/assets/*.tar.gz
 
   release-macos:
     name: Release aarch64-apple-darwin
@@ -62,7 +62,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_27.0.app
+        run: sudo xcode-select -s /Applications/Xcode_26.0.app
       - name: Set reproducible build timestamp
         run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
       - name: Build binary
